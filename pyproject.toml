@@ -1,0 +1,32 @@
+[tool.poetry]
+name = "projectname"
+version = "0.1.0"
+description = ""
+authors = ["Josh Peak <neozenith.dev@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+
+[tool.poetry.dev-dependencies]
+pyspark = "^3.2.1"
+invoke-databricks-wheel-tasks = { path="../invoke-databricks-wheel-tasks", develop=true}
+invoke-common-tasks = {extras = ["all"], version = "^0.3.2"}
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 120
+
+[tool.isort]
+profile = "black"
+multi_line_output = 3
+import_heading_stdlib = "Standard Library"
+import_heading_firstparty = "Our Libraries"
+import_heading_thirdparty = "Third Party"
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = "-s -vvv --color=yes"
+

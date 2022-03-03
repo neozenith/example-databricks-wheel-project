@@ -1,0 +1,6 @@
+.DS_Store
+dist/
+data/output.parquet/
+**/__pycache__
+.venv
+invoke.yaml
