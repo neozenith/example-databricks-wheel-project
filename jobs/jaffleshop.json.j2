@@ -1,101 +1,74 @@
 {
-    {% if job_id is defined -%}
-    "job_id": {{ job_id }},
-    {% endif -%}
-
-    "settings": {
-        "name": "jaffle_shop_etl",
-        "email_notifications": {
-            "on_failure": [
-                "josh.peak@intellify.com.au"
-            ],
-            "no_alert_for_skipped_runs": false
-        },
-        "timeout_seconds": 0,
-        "schedule": {
-            "quartz_cron_expression": "49 0 1 * * ?",
-            "timezone_id": "Australia/Sydney",
-            "pause_status": "UNPAUSED"
-        },
-        "max_concurrent_runs": 1,
-        "tasks": [
-            {% for task in tasks %}
-            {
-                "task_key": "{{ task.name }}",
-
-                {% if task.depends is defined %}
-                "depends_on": [
-                    {% for dependency in task.depends %}
-                    {
-                        "task_key": "{{ dependency }}"
-                    }{{ ", " if not loop.last else "" }}
-                    {% endfor %}
-                ],
-                {% endif %}
-                
-                "libraries": [
-                    {% for wheel in task.wheels %}
-                    {
-                        "whl": "{{ wheel }}"
-                    }{{ ", " if not loop.last else "" }}
-                    {% endfor %}
-                ],
-                "python_wheel_task": {
-                    "package_name": "{{ task.package_name }}",
-                    "entry_point": "main",
-                    "named_parameters": {
-                        {% if task.parameters is defined %}
-                        {% for param_key, param_val in task.parameters.items() %}
-                            "{{ param_key }}": "{{param_val}}"{{ ", " if not loop.last else "" }}
-                        {% endfor %}
-                        {% endif %}
-                    }
+    "name": "{{ name }}",
+    "timeout_seconds": 0,
+    "max_concurrent_runs": 1,
+    "job_clusters": [
+        {
+            "job_cluster_key": "jaffle_shop_job_cluster",
+            "new_cluster": {
+                "cluster_name": "",
+                "spark_version": "10.4.x-scala2.12",
+                "spark_conf": {
+                    "spark.master": "local[*, 4]",
+                    "spark.databricks.cluster.profile": "singleNode"
                 },
-                "job_cluster_key": "jaffle_shop_job_cluster",
-                "max_retries": 0,
-                "min_retry_interval_millis": 900000,
-                "retry_on_timeout": false,
-                "timeout_seconds": 0,
-                "email_notifications": {},
-                "description": ""
-            }{{ ", " if not loop.last else "" }}
-            {% endfor %}
-        ],
-        "job_clusters": [
-            {
-                "job_cluster_key": "jaffle_shop_job_cluster",
-                "new_cluster": {
-                    "cluster_name": "",
-                    "spark_version": "10.4.x-scala2.12",
-                    "spark_conf": {
-                        "spark.master": "local[*, 4]",
-                        "spark.databricks.cluster.profile": "singleNode"
-                    },
-                    "aws_attributes": {
-                        "zone_id": "ap-southeast-2b",
-                        "first_on_demand": 1,
-                        "availability": "SPOT_WITH_FALLBACK",
-                        "spot_bid_price_percent": 100,
-                        "ebs_volume_type": "GENERAL_PURPOSE_SSD",
-                        "ebs_volume_count": 1,
-                        "ebs_volume_size": 100
-                    },
-                    "node_type_id": "m4.large",
-                    "driver_node_type_id": "m4.large",
-                    "custom_tags": {
-                        "ResourceClass": "SingleNode"
-                    },
-                    "spark_env_vars": {
-                        "PYSPARK_PYTHON": "/databricks/python3/bin/python3"
-                    },
-                    "enable_elastic_disk": true,
-                    "num_workers": 0
-                }
+                "aws_attributes": {
+                    "zone_id": "ap-southeast-2b",
+                    "first_on_demand": 1,
+                    "availability": "SPOT_WITH_FALLBACK",
+                    "spot_bid_price_percent": 100,
+                    "ebs_volume_type": "GENERAL_PURPOSE_SSD",
+                    "ebs_volume_count": 1,
+                    "ebs_volume_size": 100
+                },
+                "node_type_id": "m4.large",
+                "driver_node_type_id": "m4.large",
+                "custom_tags": {
+                    "ResourceClass": "SingleNode"
+                },
+                "spark_env_vars": {
+                    "PYSPARK_PYTHON": "/databricks/python3/bin/python3"
+                },
+                "enable_elastic_disk": true,
+                "num_workers": 0
             }
-        ],
-        "format": "MULTI_TASK"
-    },
-    "created_time": 1650795757534,
-    "creator_user_name": "josh.peak@intellify.com.au",
-    "run_as_user_name": "josh.peak@intellify.com.au"
+        }
+    ],
+    "tasks": [
+        {% for task in tasks %}
+        {
+            "task_key": "{{ task.name }}",
+
+            {% if task.depends is defined %}
+            "depends_on": [
+                {% for dependency in task.depends %}
+                {
+                    "task_key": "{{ dependency }}"
+                }{{ ", " if not loop.last else "" }}
+                {% endfor %}
+            ],
+            {% endif %}
+            
+            "libraries": [
+                {% for wheel in task.wheels %}
+                {
+                    "whl": "{{ wheel }}"
+                }{{ ", " if not loop.last else "" }}
+                {% endfor %}
+            ],
+            "python_wheel_task": {
+                "package_name": "{{ task.package_name }}",
+                "entry_point": "main",
+                "named_parameters": {
+                    {% if task.parameters is defined %}
+                    {% for param_key, param_val in task.parameters.items() %}
+                        "{{ param_key }}": "{{param_val}}"{{ ", " if not loop.last else "" }}
+                    {% endfor %}
+                    {% endif %}
+                }
+            },
+            "job_cluster_key": "jaffle_shop_job_cluster"
+        }{{ ", " if not loop.last else "" }}
+        {% endfor %}
+    ]
 }

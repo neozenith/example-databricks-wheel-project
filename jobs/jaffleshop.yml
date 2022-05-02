@@ -1,4 +1,5 @@
 name: jaffle_shop_etl
+email: {{ email }}
 tasks:
 
   # Bronze Layer Tasks
