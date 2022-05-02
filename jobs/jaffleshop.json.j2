@@ -1,5 +1,8 @@
 {
-    "job_id": 890467007637901,
+    {% if job_id is defined -%}
+    "job_id": {{ job_id }},
+    {% endif -%}
+
     "settings": {
         "name": "jaffle_shop_etl",
         "email_notifications": {
@@ -16,65 +19,36 @@
         },
         "max_concurrent_runs": 1,
         "tasks": [
+            {% for task in tasks %}
             {
-                "task_key": "bronze_customers",
-                "notebook_task": {
-                    "notebook_path": "/Users/josh.peak@intellify.com.au/demo",
-                    "base_parameters": {
-                        "task_name": "bronze_customers"
-                    }
-                },
-                "job_cluster_key": "jaffle_shop_job_cluster",
-                "max_retries": 0,
-                "min_retry_interval_millis": 900000,
-                "retry_on_timeout": false,
-                "timeout_seconds": 0,
-                "email_notifications": {},
-                "description": ""
-            },
-            {
-                "task_key": "bronze_orders",
-                "notebook_task": {
-                    "notebook_path": "/Users/josh.peak@intellify.com.au/demo",
-                    "base_parameters": {
-                        "task_name": "bronze_orders"
-                    }
-                },
-                "job_cluster_key": "jaffle_shop_job_cluster",
-                "max_retries": 0,
-                "min_retry_interval_millis": 900000,
-                "retry_on_timeout": false,
-                "timeout_seconds": 0,
-                "email_notifications": {},
-                "description": ""
-            },
-            {
-                "task_key": "bronze_payments",
-                "notebook_task": {
-                    "notebook_path": "/Users/josh.peak@intellify.com.au/demo",
-                    "base_parameters": {
-                        "task_name": "bronze_payments"
-                    }
-                },
-                "job_cluster_key": "jaffle_shop_job_cluster",
-                "max_retries": 0,
-                "min_retry_interval_millis": 900000,
-                "retry_on_timeout": false,
-                "timeout_seconds": 0,
-                "email_notifications": {},
-                "description": ""
-            },
-            {
-                "task_key": "silver_customers",
+                "task_key": "{{ task.name }}",
+
+                {% if task.depends is defined %}
                 "depends_on": [
+                    {% for dependency in task.depends %}
                     {
-                        "task_key": "bronze_customers"
-                    }
+                        "task_key": "{{ dependency }}"
+                    }{{ ", " if not loop.last else "" }}
+                    {% endfor %}
                 ],
-                "notebook_task": {
-                    "notebook_path": "/Users/josh.peak@intellify.com.au/demo",
-                    "base_parameters": {
-                        "task_name": "silver_customers"
+                {% endif %}
+                
+                "libraries": [
+                    {% for wheel in task.wheels %}
+                    {
+                        "whl": "{{ wheel }}"
+                    }{{ ", " if not loop.last else "" }}
+                    {% endfor %}
+                ],
+                "python_wheel_task": {
+                    "package_name": "{{ task.package_name }}",
+                    "entry_point": "main",
+                    "named_parameters": {
+                        {% if task.parameters is defined %}
+                        {% for param_key, param_val in task.parameters.items() %}
+                            "{{ param_key }}": "{{param_val}}"{{ ", " if not loop.last else "" }}
+                        {% endfor %}
+                        {% endif %}
                     }
                 },
                 "job_cluster_key": "jaffle_shop_job_cluster",
@@ -84,100 +58,8 @@
                 "timeout_seconds": 0,
                 "email_notifications": {},
                 "description": ""
-            },
-            {
-                "task_key": "silver_orders",
-                "depends_on": [
-                    {
-                        "task_key": "bronze_orders"
-                    }
-                ],
-                "notebook_task": {
-                    "notebook_path": "/Users/josh.peak@intellify.com.au/demo",
-                    "base_parameters": {
-                        "task_name": "silver_orders"
-                    }
-                },
-                "job_cluster_key": "jaffle_shop_job_cluster",
-                "max_retries": 0,
-                "min_retry_interval_millis": 900000,
-                "retry_on_timeout": false,
-                "timeout_seconds": 0,
-                "email_notifications": {},
-                "description": ""
-            },
-            {
-                "task_key": "silver_payments",
-                "depends_on": [
-                    {
-                        "task_key": "bronze_payments"
-                    }
-                ],
-                "notebook_task": {
-                    "notebook_path": "/Users/josh.peak@intellify.com.au/demo",
-                    "base_parameters": {
-                        "task_name": "silver_payments"
-                    }
-                },
-                "job_cluster_key": "jaffle_shop_job_cluster",
-                "max_retries": 0,
-                "min_retry_interval_millis": 900000,
-                "retry_on_timeout": false,
-                "timeout_seconds": 0,
-                "email_notifications": {},
-                "description": ""
-            },
-            {
-                "task_key": "gold_orders",
-                "depends_on": [
-                    {
-                        "task_key": "silver_orders"
-                    },
-                    {
-                        "task_key": "silver_payments"
-                    }
-                ],
-                "notebook_task": {
-                    "notebook_path": "/Users/josh.peak@intellify.com.au/demo",
-                    "base_parameters": {
-                        "task_name": "gold_orders"
-                    }
-                },
-                "job_cluster_key": "jaffle_shop_job_cluster",
-                "max_retries": 0,
-                "min_retry_interval_millis": 900000,
-                "retry_on_timeout": false,
-                "timeout_seconds": 0,
-                "email_notifications": {},
-                "description": ""
-            },
-            {
-                "task_key": "gold_customers",
-                "depends_on": [
-                    {
-                        "task_key": "silver_customers"
-                    },
-                    {
-                        "task_key": "silver_orders"
-                    },
-                    {
-                        "task_key": "silver_payments"
-                    }
-                ],
-                "notebook_task": {
-                    "notebook_path": "/Users/josh.peak@intellify.com.au/demo",
-                    "base_parameters": {
-                        "task_name": "gold_customers"
-                    }
-                },
-                "job_cluster_key": "jaffle_shop_job_cluster",
-                "max_retries": 0,
-                "min_retry_interval_millis": 900000,
-                "retry_on_timeout": false,
-                "timeout_seconds": 0,
-                "email_notifications": {},
-                "description": ""
-            }
+            }{{ ", " if not loop.last else "" }}
+            {% endfor %}
         ],
         "job_clusters": [
             {

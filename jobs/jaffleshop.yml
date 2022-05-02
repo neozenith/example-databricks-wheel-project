@@ -1,0 +1,76 @@
+name: jaffle_shop_etl
+tasks:
+
+  # Bronze Layer Tasks
+  - name: bronze_orders
+    wheels:
+      - {{ bronze_wheel }}
+    package_name: {{ bronze_package }}
+    parameters:
+      task_name: bronze_orders
+
+  - name: bronze_customers
+    wheels:
+      - {{ bronze_wheel }}
+    package_name: {{ bronze_package }}
+    parameters:
+      task_name: bronze_customers
+
+  - name: bronze_payments
+    wheels:
+      - {{ bronze_wheel }}
+    package_name: {{ bronze_package }}
+    parameters:
+      task_name: bronze_payments
+
+  # Silver Layer Tasks
+  - name: silver_orders
+    wheels:
+      - {{ silver_wheel }}
+    package_name: {{ silver_package }}
+    parameters:
+      task_name: silver_orders
+    depends:
+      - bronze_orders
+
+  - name: silver_customers
+    wheels:
+      - {{ silver_wheel }}
+    package_name: {{ silver_package }}
+    parameters:
+      task_name: silver_customers
+    depends:
+      - bronze_customers
+
+  - name: silver_payments
+    wheels:
+      - {{ silver_wheel }}
+    package_name: {{ silver_package }}
+    parameters:
+      task_name: silver_payments
+    depends:
+      - bronze_payments
+        
+  # Gold Layer Tasks
+  - name: gold_customers
+    wheels:
+      - {{ gold_wheel }}
+    package_name: {{ gold_package }}
+    parameters:
+      task_name: gold_customers
+    depends:
+      - silver_customers
+      - silver_orders
+      - silver_payments
+
+  - name: gold_orders
+    wheels:
+      - {{ gold_wheel }}
+    package_name: {{ gold_package }}
+    parameters:
+      task_name: gold_orders
+    depends:
+      - silver_orders
+      - silver_payments
+meta:
+  branch: {{ branch }}
